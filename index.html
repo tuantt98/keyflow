@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="A fast, dependency-free typing practice app with editable custom text." />
+  <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+  <link rel="stylesheet" href="./styles.css" />
+  <title>Keyflow — Focused typing practice</title>
+</head>
+
+<body>
+  <main class="app-shell">
+    <header class="site-header">
+      <button class="brand" id="home-button" type="button" aria-label="Keyflow home">
+        <svg aria-hidden="true" viewBox="0 0 40 40" fill="none">
+          <rect x="3" y="8" width="34" height="24" rx="5" stroke="currentColor" stroke-width="2" />
+          <path d="M9 15h3m4 0h3m4 0h3m4 0h1M9 21h3m4 0h3m4 0h3m4 0h1M11 27h18" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" />
+        </svg>
+        <span><small>steady hands</small>keyflow</span>
+      </button>
+
+      <nav aria-label="Utility navigation">
+        <button type="button" aria-label="Practice" title="Practice">⌨</button>
+        <button type="button" aria-label="Statistics" title="Statistics">⌁</button>
+        <button type="button" aria-label="Language" title="English">文</button>
+        <button id="theme-toggle" type="button" aria-label="Use light theme" title="Toggle theme">☀</button>
+      </nav>
+    </header>
+
+    <section class="workspace" aria-label="Typing test">
+      <div class="mode-dock">
+        <div class="quick-toggles">
+          <button id="punctuation-toggle" type="button" aria-pressed="false"><b>@</b> punctuation</button>
+          <button id="numbers-toggle" type="button" aria-pressed="false"><b>#</b> numbers</button>
+        </div>
+
+        <div class="dock-divider"></div>
+
+        <div class="mode-options" aria-label="Test mode">
+          <button type="button" data-mode="time" class="active" aria-pressed="true"><span>◷</span> time</button>
+          <button type="button" data-mode="words" aria-pressed="false"><span>≡</span> words</button>
+          <button type="button" data-mode="quote" aria-pressed="false"><span>“</span> quote</button>
+          <button type="button" data-mode="zen" aria-pressed="false"><span>✦</span> zen</button>
+          <button type="button" data-mode="custom" aria-pressed="false"><span>⌁</span> custom</button>
+        </div>
+
+        <div class="dock-divider"></div>
+        <div class="sub-options" id="sub-options" aria-label="Mode options"></div>
+      </div>
+
+      <section id="test-view">
+        <div class="live-row" aria-live="polite">
+          <span class="primary-stat" id="primary-stat">30</span>
+          <span id="live-wpm" hidden>0 wpm</span>
+          <span id="live-accuracy" hidden>100% acc</span>
+          <span class="language">◎ english</span>
+        </div>
+
+        <div class="typing-stage" id="typing-stage">
+          <div class="progress-rail"><span id="progress-bar"></span></div>
+          <div class="text-stream" id="text-stream" aria-hidden="true"></div>
+          <textarea id="typing-input" class="typing-capture" aria-label="Type the displayed text" autocomplete="off"
+            autocapitalize="off" autocorrect="off" spellcheck="false"></textarea>
+          <div class="focus-prompt" id="focus-prompt">⚡ click here or press tab to focus</div>
+        </div>
+
+        <button class="restart-icon" id="restart-button" type="button" aria-label="Restart test"
+          title="Restart">↻</button>
+      </section>
+
+      <section class="result-panel" id="result-view" aria-live="polite" hidden>
+        <div class="result-main">
+          <div class="metric"><span>wpm</span><strong class="accent" id="result-wpm">0</strong></div>
+          <div class="metric"><span>accuracy</span><strong class="accent" id="result-accuracy">100%</strong></div>
+        </div>
+        <div class="result-grid">
+          <div class="metric"><span>raw</span><strong id="result-raw">0</strong></div>
+          <div class="metric"><span>characters</span><strong id="result-characters">0/0/0</strong></div>
+          <div class="metric"><span>consistency</span><strong id="result-consistency">100%</strong></div>
+          <div class="metric"><span>time</span><strong id="result-time">0.0s</strong></div>
+        </div>
+        <div class="result-actions">
+          <button id="repeat-button" type="button">↻ repeat</button>
+          <button id="next-button" class="primary-action" type="button">next test <span>→</span></button>
+        </div>
+      </section>
+    </section>
+
+    <footer class="site-footer">
+      <div><kbd>tab</kbd><span>+</span><kbd>enter</kbd><span>restart test</span></div>
+      <p>Dependency-free and local. Your custom text stays in this browser.</p>
+      <span class="theme-name"><i></i> graphite yellow</span>
+    </footer>
+  </main>
+
+  <div class="dialog-overlay" id="custom-overlay" hidden>
+    <section class="custom-dialog" role="dialog" aria-modal="true" aria-labelledby="custom-dialog-title"
+      aria-describedby="custom-dialog-description">
+      <button class="dialog-close" id="dialog-close" type="button" aria-label="Close custom editor">×</button>
+      <header class="dialog-header">
+        <h2 id="custom-dialog-title"><span>✎</span> Custom text</h2>
+        <p id="custom-dialog-description">Paste any passage, choose how it should be generated, then start typing.</p>
+      </header>
+
+      <div class="editor-block">
+        <textarea id="custom-text" aria-label="Custom typing text"
+          placeholder="Type or paste your custom text…"></textarea>
+        <div class="editor-meta">
+          <span id="custom-count">0 characters · 0 words</span>
+          <label class="file-button">⇧ import .txt<input id="file-input" type="file" accept=".txt,text/plain" /></label>
+        </div>
+      </div>
+
+      <div class="custom-grid">
+        <fieldset>
+          <legend>⤨ Mode</legend>
+          <p>Change the order and repetition of your text.</p>
+          <div class="segmented" data-custom-group="mode">
+            <button type="button" data-value="simple" class="active" aria-pressed="true">simple</button>
+            <button type="button" data-value="repeat" aria-pressed="false">repeat</button>
+            <button type="button" data-value="shuffle" aria-pressed="false">shuffle</button>
+            <button type="button" data-value="random" aria-pressed="false">random</button>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>◷ Limit</legend>
+          <p>End after a word count, a duration, or the full text.</p>
+          <div class="limit-row">
+            <div class="segmented compact" data-custom-group="limitType">
+              <button type="button" data-value="none" class="active" aria-pressed="true">none</button>
+              <button type="button" data-value="words" aria-pressed="false">words</button>
+              <button type="button" data-value="time" aria-pressed="false">time</button>
+            </div>
+            <input id="limit-value" type="number" min="1" max="9999" value="50" disabled
+              aria-label="Custom limit value" />
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>≡ Word delimiter</legend>
+          <p>Use spaces for prose or pipes for word groups.</p>
+          <div class="segmented" data-custom-group="delimiter">
+            <button type="button" data-value="space" class="active" aria-pressed="true">space</button>
+            <button type="button" data-value="pipe" aria-pressed="false">pipe</button>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>✦ Clean text</legend>
+          <p>Normalize pasted content before practice.</p>
+          <div class="utility-buttons">
+            <button id="clean-zero" type="button">zero-width</button>
+            <button id="clean-typography" type="button">typography</button>
+            <button id="clean-control" type="button">control chars</button>
+            <button id="clean-lines" type="button">line breaks</button>
+          </div>
+        </fieldset>
+      </div>
+
+      <footer class="dialog-actions">
+        <button class="ghost-action" id="reset-custom" type="button">reset sample</button>
+        <button class="save-action" id="apply-custom" type="button">apply & start <span>→</span></button>
+      </footer>
+    </section>
+  </div>
+
+  <script src="./app.js"></script>
+</body>
+
+</html>
