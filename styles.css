@@ -302,7 +302,7 @@ button {
   position: relative;
   z-index: 1;
   max-height: 190px;
-  overflow: auto;
+  overflow: hidden;
   color: var(--faint);
   font:
     500 clamp(1.55rem, 2.55vw, 2.15rem)/1.55 "Cascadia Code",
